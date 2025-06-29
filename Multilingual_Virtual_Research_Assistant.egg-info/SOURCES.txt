@@ -1,0 +1,9 @@
+README.md
+setup.py
+Multilingual_Virtual_Research_Assistant.egg-info/PKG-INFO
+Multilingual_Virtual_Research_Assistant.egg-info/SOURCES.txt
+Multilingual_Virtual_Research_Assistant.egg-info/dependency_links.txt
+Multilingual_Virtual_Research_Assistant.egg-info/top_level.txt
+utils/__init__.py
+utils/llama_client.py
+utils/prompt.py
