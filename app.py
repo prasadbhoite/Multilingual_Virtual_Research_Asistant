@@ -1,10 +1,13 @@
+### app.py
+
 import streamlit as st
 from utils.llama_client import ask_question, summarize_text
 
 st.set_page_config(page_title="MVRA - Text Assistant", layout="wide")
 
-# Gate: Require user to input API key and base URL
-if "api_key" not in st.session_state or "base_url" not in st.session_state:
+# Step 1: API Credential Input
+display_api_prompt = "api_key" not in st.session_state or "base_url" not in st.session_state
+if display_api_prompt:
     st.title("🔐 Enter LLaMA API Credentials")
 
     api_key = st.text_input("LLaMA API Key", type="password")
@@ -19,9 +22,6 @@ if "api_key" not in st.session_state or "base_url" not in st.session_state:
             st.error("Please enter both API key and base URL.")
     st.stop()
 
-
-
-
 # Step 2: Main App UI
 st.title("🧠 MVRA: Text Assistant")
 
@@ -33,7 +33,7 @@ with tab1:
     if st.button("Get Answer", key="qa"):
         with st.spinner("Thinking..."):
             if question:
-                answer = ask_question(question)
+                answer = ask_question(question, st.session_state.api_key, st.session_state.base_url)
                 st.success("Answer:")
                 st.write(answer)
             else:
@@ -45,7 +45,7 @@ with tab2:
     if st.button("Summarize", key="sum"):
         with st.spinner("Summarizing..."):
             if text_input:
-                summary = summarize_text(text_input)
+                summary = summarize_text(text_input, st.session_state.api_key, st.session_state.base_url)
                 st.success("Summary:")
                 st.write(summary)
             else:
