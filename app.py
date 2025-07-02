@@ -33,7 +33,7 @@ with tab1:
     if st.button("Get Answer", key="qa"):
         with st.spinner("Thinking..."):
             if question:
-                answer = ask_question(question, st.session_state.api_key, st.session_state.base_url)
+                answer = ask_question(question)
                 st.success("Answer:")
                 st.write(answer)
             else:
@@ -45,7 +45,7 @@ with tab2:
     if st.button("Summarize", key="sum"):
         with st.spinner("Summarizing..."):
             if text_input:
-                summary = summarize_text(text_input, st.session_state.api_key, st.session_state.base_url)
+                summary = summarize_text(text_input)
                 st.success("Summary:")
                 st.write(summary)
             else:
