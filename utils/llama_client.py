@@ -1,7 +1,11 @@
+
+### utils/llama_client.py
+
 import os
 import requests
 import json
 from dotenv import load_dotenv
+from llama_api_client import LlamaAPIClient
 
 load_dotenv()
 LLAMA_API_KEY = os.getenv("LLAMA_API_KEY")
@@ -11,7 +15,6 @@ HEADERS = {
     "Content-Type": "application/json",
     "Authorization": f"Bearer {LLAMA_API_KEY}"
 }
-
 
 def chat_completion(messages, api_key, base_url, model="Llama-3.3-8B-Instruct", max_tokens=256):
     headers = {
@@ -48,6 +51,22 @@ def summarize_text(text: str, api_key: str, base_url: str) -> str:
     ]
     response = chat_completion(messages, api_key, base_url, max_tokens=150)
     return extract_response_content(response)
+
+def analyze_image_url(prompt: str, image_url: str, api_key: str,
+                      model="Llama-4-Scout-17B-16E-Instruct-FP8") -> str:
+    content = [
+        {"type": "text", "text": prompt},
+        {"type": "image_url", "image_url": {"url": image_url}}
+    ]
+
+    client = LlamaAPIClient(api_key=api_key)
+    response = client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": content}],
+        temperature=0
+    )
+
+    return response.completion_message.content.text
 
 def extract_response_content(response: dict) -> str:
     try:

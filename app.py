@@ -1,9 +1,9 @@
 ### app.py
 
 import streamlit as st
-from utils.llama_client import ask_question, summarize_text
+from utils.llama_client import ask_question, summarize_text, analyze_image_url
 
-st.set_page_config(page_title="MVRA - Text Assistant", layout="wide")
+st.set_page_config(page_title="MVRA - Assistant", layout="wide")
 
 # Step 1: API Credential Input
 display_api_prompt = "api_key" not in st.session_state or "base_url" not in st.session_state
@@ -23,9 +23,9 @@ if display_api_prompt:
     st.stop()
 
 # Step 2: Main App UI
-st.title("🧠 MVRA: Text Assistant")
+st.title("🧠 MVRA: Assistant")
 
-tab1, tab2 = st.tabs(["📝 Ask a Question", "📰 Summarize Text"])
+tab1, tab2, tab3 = st.tabs(["📝 Ask a Question", "📰 Summarize Text", "🖼️ Analyze Image (URL)"])
 
 with tab1:
     st.subheader("Ask any question")
@@ -50,3 +50,19 @@ with tab2:
                 st.write(summary)
             else:
                 st.warning("Please enter some text.")
+
+with tab3:
+    st.subheader("Analyze image from URL")
+    prompt = st.text_input("What would you like to know about the image?")
+    image_url = st.text_input("Enter a valid image URL")
+
+    if st.button("Analyze Image"):
+        if not image_url or not prompt:
+            st.warning("Please provide both an image URL and a prompt.")
+        else:
+            st.image(image_url, caption="Image Preview", use_container_width=True)
+            with st.spinner("Analyzing image..."):
+                result = analyze_image_url(prompt, image_url, st.session_state.api_key)
+                st.success("Result:")
+                st.write(result)
+
