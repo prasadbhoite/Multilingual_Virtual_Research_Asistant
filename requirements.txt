@@ -2,3 +2,4 @@
 streamlit
 requests
 python-dotenv
+llama-api-client
