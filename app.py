@@ -172,7 +172,8 @@ with tab7:
 
 with tab8:
     st.subheader("🧠 Image Grounding")
-    grounding_prompt = st.text_input("Enter your prompt for image grounding", value="Which tools in the image can be used for measuring length?")
+    grounding_prompt = st.text_input("Enter your prompt for image grounding", value="Which tools in the image can be used for measuring length? \n" \
+    "Provide bounding boxes for every recognized item.")
     uploaded_grounding_image = st.file_uploader("Upload an image for grounding", type=["jpg", "jpeg", "png"], key="grounding")
 
     if st.button("Run Grounding"):
