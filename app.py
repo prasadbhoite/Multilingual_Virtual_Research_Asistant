@@ -3,16 +3,15 @@ from utils.llama_client import (
     ask_question,
     summarize_text,
     analyze_image_url,
+    analyze_multiple_images,
     multilingual_translate,
 )
 
 st.set_page_config(page_title="MVRA - Assistant", layout="wide")
 
 # Step 1: API Credential Input
-display_api_prompt = "api_key" not in st.session_state or "base_url" not in st.session_state
-if display_api_prompt:
+if "api_key" not in st.session_state or "base_url" not in st.session_state:
     st.title("🔐 Enter LLaMA API Credentials")
-
     api_key = st.text_input("LLaMA API Key", type="password")
     base_url = st.text_input("LLaMA Base URL", placeholder="https://api.llama.com/v1")
 
@@ -25,13 +24,14 @@ if display_api_prompt:
             st.error("Please enter both API key and base URL.")
     st.stop()
 
-# Step 2: Main App UI
+# Main UI
 st.title("🧠 MVRA: Assistant")
 
-tab1, tab2, tab3, tab4 = st.tabs([
-    "📝 Ask a Question", 
-    "📰 Summarize Text", 
-    "🖼️ Analyze Image (URL)", 
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "📝 Ask a Question",
+    "📰 Summarize Text",
+    "🖼️ Analyze Single Image",
+    "🖼️ Analyze Multiple Images",
     "🌍 Multilingual Translator"
 ])
 
@@ -60,7 +60,7 @@ with tab2:
                 st.warning("Please enter some text.")
 
 with tab3:
-    st.subheader("Analyze image from URL")
+    st.subheader("Analyze a single image from URL")
     prompt = st.text_input("What would you like to know about the image?")
     image_url = st.text_input("Enter a valid image URL")
     if st.button("Analyze Image"):
@@ -74,6 +74,24 @@ with tab3:
                 st.write(result)
 
 with tab4:
+    st.subheader("Analyze multiple images (max 9)")
+    prompt = st.text_input("What would you like to know about these images?")
+    urls_input = st.text_area("Paste up to 9 image URLs (one per line)")
+    image_urls = [url.strip() for url in urls_input.splitlines() if url.strip()]
+    if st.button("Analyze Multiple Images"):
+        if not prompt or not image_urls:
+            st.warning("Please provide a prompt and at least one image URL.")
+        elif len(image_urls) > 9:
+            st.warning("You can only analyze up to 9 images.")
+        else:
+            for img_url in image_urls:
+                st.image(img_url, caption=img_url, use_container_width=True)
+            with st.spinner("Analyzing multiple images..."):
+                result = analyze_multiple_images(prompt, image_urls, st.session_state.api_key)
+                st.success("Result:")
+                st.write(result)
+
+with tab5:
     st.subheader("Multilingual Translation Chat")
     user_input = st.text_area("Enter your message")
     source_lang = st.selectbox("Source Language", ["English", "French", "Spanish", "Hindi", "Chinese"])

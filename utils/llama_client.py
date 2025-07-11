@@ -1,3 +1,4 @@
+## utils/llama_client.py
 import os
 import requests
 from llama_api_client import LlamaAPIClient
@@ -45,6 +46,24 @@ def analyze_image_url(prompt: str, image_url: str, api_key: str,
         {"type": "text", "text": prompt},
         {"type": "image_url", "image_url": {"url": image_url}}
     ]
+    client = LlamaAPIClient(api_key=api_key)
+    response = client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": content}],
+        temperature=0
+    )
+    return response.completion_message.content.text
+
+def analyze_multiple_images(prompt: str, image_urls: list, api_key: str,
+                            model="Llama-4-Scout-17B-16E-Instruct-FP8") -> str:
+    if not image_urls:
+        return "No image URLs provided."
+    if len(image_urls) > 9:
+        return "You can only analyze up to 9 images."
+
+    content = [{"type": "text", "text": prompt}]
+    content.extend([{"type": "image_url", "image_url": {"url": url}} for url in image_urls])
+
     client = LlamaAPIClient(api_key=api_key)
     response = client.chat.completions.create(
         model=model,
