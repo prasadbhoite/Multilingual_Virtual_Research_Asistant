@@ -140,6 +140,81 @@ def analyze_uploaded_multiple_images(prompt: str, image_files: list, api_key: st
 
 
 
+
+
+import base64
+import re
+from pydantic import BaseModel
+from typing import List
+from io import BytesIO
+import streamlit as st
+from PIL import Image
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import tempfile
+
+class BoundingBox(BaseModel):
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+
+class Tool(BaseModel):
+    name: str
+    bbox: BoundingBox
+
+def encode_image_bytes_to_base64(image_bytes: bytes) -> str:
+    return base64.b64encode(image_bytes).decode("utf-8")
+
+def parse_output(output: str) -> List[Tool]:
+    bboxes = re.findall(r'<BBOX>(.*?)</BBOX>', output)
+    lines = output.split('\n')
+    tools = []
+
+    for line in lines:
+        if '**' in line and bboxes:
+            name = line.strip().replace('*', '').strip()
+            x1, y1, x2, y2 = map(float, bboxes.pop(0).split(','))
+            tools.append(Tool(name=name, bbox=BoundingBox(x1=x1, y1=y1, x2=x2, y2=y2)))
+
+    return tools
+
+def analyze_image_grounding(prompt: str, image_bytes: bytes, api_key: str, model="Llama-4-Scout-17B-16E-Instruct-FP8"):
+    encoded = encode_image_bytes_to_base64(image_bytes)
+    content = [
+        {"type": "text", "text": prompt},
+        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded}"}}
+    ]
+    client = LlamaAPIClient(api_key=api_key)
+    response = client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": content}],
+        temperature=0
+    )
+    return response.completion_message.content.text
+
+def draw_bounding_boxes_from_bytes(image_bytes: bytes, tools: List[Tool]) -> None:
+    img = Image.open(BytesIO(image_bytes))
+    width, height = img.size
+    fig, ax = plt.subplots()
+    ax.imshow(img)
+
+    for tool in tools:
+        rect = patches.Rectangle((tool.bbox.x1 * width, tool.bbox.y1 * height),
+                                 (tool.bbox.x2 - tool.bbox.x1) * width,
+                                 (tool.bbox.y2 - tool.bbox.y1) * height,
+                                 linewidth=1, edgecolor='red', facecolor='none')
+        ax.add_patch(rect)
+        ax.text(tool.bbox.x1 * width, tool.bbox.y1 * height, tool.name, color='red', fontsize=8)
+
+    ax.set_xlim(0, width)
+    ax.set_ylim(height, 0)
+    plt.axis("off")
+    st.pyplot(fig)
+
+
+
+
 def extract_response_content(response: dict) -> str:
     try:
         message = response.get("completion_message")

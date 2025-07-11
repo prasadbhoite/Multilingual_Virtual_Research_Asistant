@@ -4,3 +4,6 @@ requests
 python-dotenv
 llama-api-client
 openai
+pillow
+matplotlib
+pydantic

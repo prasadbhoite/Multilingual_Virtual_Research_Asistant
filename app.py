@@ -7,6 +7,9 @@ from utils.llama_client import (
     multilingual_translate,
     analyze_uploaded_image,
     analyze_uploaded_multiple_images,
+    analyze_image_grounding,
+    parse_output,
+    draw_bounding_boxes_from_bytes,
 )
 
 st.set_page_config(page_title="MVRA - Assistant", layout="wide")
@@ -29,14 +32,15 @@ if "api_key" not in st.session_state or "base_url" not in st.session_state:
 # Main UI
 st.title("🧠 MVRA: Assistant")
 
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
     "📝 Ask a Question",
     "📰 Summarize Text",
     "🖼️ Analyze Single Image (URL)",
     "🖼️ Analyze Multiple Images (URL)",
     "🌍 Multilingual Translator",
     "📤 Analyze Uploaded Image",
-    "📤 Analyze Multiple Uploaded Images" 
+    "📤 Analyze Multiple Uploaded Images",
+    "📍 Image Grounding" 
 ])
 
 with tab1:
@@ -163,3 +167,27 @@ with tab7:
                 )
                 st.success("Analysis Result:")
                 st.write(result)
+
+
+
+with tab8:
+    st.subheader("🧠 Image Grounding")
+    grounding_prompt = st.text_input("Enter your prompt for image grounding", value="Which tools in the image can be used for measuring length?")
+    uploaded_grounding_image = st.file_uploader("Upload an image for grounding", type=["jpg", "jpeg", "png"], key="grounding")
+
+    if st.button("Run Grounding"):
+        if not uploaded_grounding_image or not grounding_prompt:
+            st.warning("Please provide both an image and a prompt.")
+        else:
+            image_bytes = uploaded_grounding_image.read()
+            st.image(image_bytes, caption="Uploaded Image", use_container_width=True)
+            with st.spinner("Grounding image..."):
+                response = analyze_image_grounding(
+                    prompt=grounding_prompt,
+                    image_bytes=image_bytes,
+                    api_key=st.session_state.api_key
+                )
+                tools = parse_output(response)
+                st.success("Grounding Result:")
+                draw_bounding_boxes_from_bytes(image_bytes, tools)
+                st.code(response)
