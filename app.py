@@ -5,6 +5,7 @@ from utils.llama_client import (
     analyze_image_url,
     analyze_multiple_images,
     multilingual_translate,
+    analyze_uploaded_image,
 )
 
 st.set_page_config(page_title="MVRA - Assistant", layout="wide")
@@ -27,12 +28,13 @@ if "api_key" not in st.session_state or "base_url" not in st.session_state:
 # Main UI
 st.title("🧠 MVRA: Assistant")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "📝 Ask a Question",
     "📰 Summarize Text",
     "🖼️ Analyze Single Image (URL)",
     "🖼️ Analyze Multiple Images (URL)",
-    "🌍 Multilingual Translator"
+    "🌍 Multilingual Translator",
+    "📤 Analyze Uploaded Image"
 ])
 
 with tab1:
@@ -111,4 +113,24 @@ with tab5:
                     base_url="https://api.llama.com/compat/v1/"
                 )
                 st.success("Translation Result:")
+                st.write(result)
+
+with tab6:
+    st.subheader("Analyze a single uploaded image")
+    prompt = st.text_input("What would you like to ask about the uploaded image?")
+    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+
+    if st.button("Analyze Uploaded Image"):
+        if not uploaded_file or not prompt:
+            st.warning("Please upload an image and enter a prompt.")
+        else:
+            image_bytes = uploaded_file.read()
+            st.image(image_bytes, caption="Uploaded Image", use_container_width=True)
+            with st.spinner("Analyzing uploaded image..."):
+                result = analyze_uploaded_image(
+                    prompt=prompt,
+                    image_bytes=image_bytes,
+                    api_key=st.session_state.api_key
+                )
+                st.success("Analysis Result:")
                 st.write(result)

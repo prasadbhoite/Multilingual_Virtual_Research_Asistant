@@ -4,3 +4,4 @@ requests
 python-dotenv
 llama-api-client
 openai
+base64

@@ -3,6 +3,7 @@ import os
 import requests
 from llama_api_client import LlamaAPIClient
 from openai import OpenAI
+import base64
 
 def chat_completion(messages, api_key, base_url, model="Llama-3.3-8B-Instruct", max_tokens=256):
     headers = {
@@ -92,6 +93,24 @@ Return:
         temperature=0
     )
     return response.choices[0].message.content
+
+
+def analyze_uploaded_image(prompt: str, image_bytes: bytes, api_key: str,
+                           model="Llama-4-Scout-17B-16E-Instruct-FP8") -> str:
+    base64_str = base64.b64encode(image_bytes).decode("utf-8")
+    base64_data_uri = f"data:image/jpeg;base64,{base64_str}"
+
+    content = [
+        {"type": "text", "text": prompt},
+        {"type": "image_url", "image_url": {"url": base64_data_uri}}
+    ]
+    client = LlamaAPIClient(api_key=api_key)
+    response = client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": content}],
+        temperature=0
+    )
+    return response.completion_message.content.text
 
 def extract_response_content(response: dict) -> str:
     try:
