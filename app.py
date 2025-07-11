@@ -6,6 +6,7 @@ from utils.llama_client import (
     analyze_multiple_images,
     multilingual_translate,
     analyze_uploaded_image,
+    analyze_uploaded_multiple_images,
 )
 
 st.set_page_config(page_title="MVRA - Assistant", layout="wide")
@@ -28,13 +29,14 @@ if "api_key" not in st.session_state or "base_url" not in st.session_state:
 # Main UI
 st.title("🧠 MVRA: Assistant")
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📝 Ask a Question",
     "📰 Summarize Text",
     "🖼️ Analyze Single Image (URL)",
     "🖼️ Analyze Multiple Images (URL)",
     "🌍 Multilingual Translator",
-    "📤 Analyze Uploaded Image"
+    "📤 Analyze Uploaded Image",
+    "📤 Analyze Multiple Uploaded Images" 
 ])
 
 with tab1:
@@ -130,6 +132,33 @@ with tab6:
                 result = analyze_uploaded_image(
                     prompt=prompt,
                     image_bytes=image_bytes,
+                    api_key=st.session_state.api_key
+                )
+                st.success("Analysis Result:")
+                st.write(result)
+
+with tab7:
+    st.subheader("Analyze multiple uploaded images (up to 9)")
+    prompt = st.text_input("What would you like to ask about these images?")
+    uploaded_files = st.file_uploader(
+        "Upload up to 9 images", 
+        type=["jpg", "jpeg", "png"],
+        accept_multiple_files=True
+    )
+
+    if st.button("Analyze Uploaded Images"):
+        if not uploaded_files or not prompt:
+            st.warning("Please upload images and enter a prompt.")
+        elif len(uploaded_files) > 9:
+            st.warning("You can only analyze up to 9 images.")
+        else:
+            for img in uploaded_files:
+                st.image(img, caption=img.name, use_container_width=True)
+
+            with st.spinner("Analyzing uploaded images..."):
+                result = analyze_uploaded_multiple_images(
+                    prompt=prompt,
+                    image_files=uploaded_files,
                     api_key=st.session_state.api_key
                 )
                 st.success("Analysis Result:")

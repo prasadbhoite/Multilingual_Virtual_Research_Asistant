@@ -112,6 +112,34 @@ def analyze_uploaded_image(prompt: str, image_bytes: bytes, api_key: str,
     )
     return response.completion_message.content.text
 
+
+
+def analyze_uploaded_multiple_images(prompt: str, image_files: list, api_key: str,
+                                     model="Llama-4-Scout-17B-16E-Instruct-FP8") -> str:
+    if not image_files:
+        return "[Error: No images provided]"
+
+    # Prepare image content
+    image_contents = []
+    for file in image_files:
+        encoded = base64.b64encode(file.read()).decode("utf-8")
+        image_contents.append({
+            "type": "image_url",
+            "image_url": {"url": f"data:image/jpeg;base64,{encoded}"}
+        })
+
+    content = [{"type": "text", "text": prompt}] + image_contents
+
+    client = LlamaAPIClient(api_key=api_key)
+    response = client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": content}],
+        temperature=0
+    )
+    return response.completion_message.content.text
+
+
+
 def extract_response_content(response: dict) -> str:
     try:
         message = response.get("completion_message")
