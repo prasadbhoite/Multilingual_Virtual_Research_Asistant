@@ -61,8 +61,8 @@ with tab2:
 
 with tab3:
     st.subheader("Analyze a single image from URL")
-    prompt = st.text_input("What would you like to know about the image?")
-    image_url = st.text_input("Enter a valid image URL")
+    prompt = st.text_input("What would you like to know about the image?", placeholder="What's in the image?")
+    image_url = st.text_input("Enter a valid image URL", placeholder= "https://raw.githubusercontent.com/meta-llama/llama-models/refs/heads/main/Llama_Repo.jpeg")
     if st.button("Analyze Image"):
         if not image_url or not prompt:
             st.warning("Please provide both an image URL and a prompt.")
@@ -75,8 +75,10 @@ with tab3:
 
 with tab4:
     st.subheader("Analyze multiple images (max 9)")
-    prompt = st.text_input("What would you like to know about these images?")
-    urls_input = st.text_area("Paste up to 9 image URLs (one per line)")
+    prompt = st.text_input("What would you like to know about these images?", placeholder="Compare the following images?")
+    urls_input = st.text_area("Paste up to 9 image URLs (one per line)", 
+    placeholder= """https://raw.githubusercontent.com/meta-llama/llama-models/refs/heads/main/Llama_Repo.jpeg
+    https://raw.githubusercontent.com/meta-llama/PurpleLlama/refs/heads/main/logo.png""")
     image_urls = [url.strip() for url in urls_input.splitlines() if url.strip()]
     if st.button("Analyze Multiple Images"):
         if not prompt or not image_urls:
