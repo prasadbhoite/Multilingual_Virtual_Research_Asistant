@@ -30,8 +30,8 @@ st.title("🧠 MVRA: Assistant")
 tab1, tab2, tab3, tab4, tab5 = st.tabs([
     "📝 Ask a Question",
     "📰 Summarize Text",
-    "🖼️ Analyze Single Image",
-    "🖼️ Analyze Multiple Images",
+    "🖼️ Analyze Single Image (URL)",
+    "🖼️ Analyze Multiple Images (URL)",
     "🌍 Multilingual Translator"
 ])
 
